@@ -7,6 +7,7 @@
 - [Directives](#Directives)
 - [Components](#Components)
 - [Store Managment](#Store-Managment)
+- [Unit test](#unit-test)
 
 ## Уроки
 
@@ -198,3 +199,119 @@ Questions:
 [ANgRxToddMotto]: https://www.youtube.com/watch?v=N_UQx8dPPkc&list=PLW2eQOsUPlWJRfWGOi9gZdc3rE4Fke0Wv
 [ANgRx-schema-image]: ./img/angular-ngrx.jpg
 [ANgRxCoursehunters]: https://coursehunters.net/course/angular-4-ngrx
+
+## Unit Test
+
+Содержание:
+
+- [Тестирование DOM](#dom-testing)
+- [Тестирование вложенных компонентов](#Тестирование-вложенных-компонентов)
+- [Подход к тестам через HOST](#Test-Host-Approach)
+- [Stub](#stub)
+- [Что в целом нужно тестировать](#Что-нужно-тестировать)
+
+### DOM Testing
+
+- fixture.detectedChanges();
+- nativeElement = fixture.nativeElement;
+- debugElement = fixture.debugElement;
+- debugElement.query(By.css('.some-class'))
+- component = fixture.componentInstance;
+
+### Тестирование вложенных компонентов
+
+- Shallow Testing
+- Stub Components
+- NO_ERRORS_SCHEMA
+- CUSTOM_ELEMENTS_SCHEMA
+
+### Test Host Approach
+
+```typescript
+@Component({
+    template: `
+        <app-some-component
+            [publication]="publication" (like)="onLiked($event)"
+        ></app-some-component>
+    `;
+})
+class TestHostComponent {
+    public publication: Publication = { id: 1, title: '11', ImageSrc: 'ss.jps' };
+    public likedPublication: Publication;
+    public onLiked(likedPublication: Publication) { this.likedPublication = likedPublication };
+}
+
+describe('Some Component Test', () => {
+    let testHost: TestHostComponent;
+    let fixture: ComponentFixture<TestHostComponent>;
+
+    let publication: Publication;
+    let publicationLogService: Partial<PublicationLogService>;
+
+    beforeEach(() => {
+        publicationLogService = {
+            logPublication: jasmine.createSpy('logPublication');
+        }
+
+        TestBed.configurateTestingModule({
+            declarations: [
+                SomeComponent, TestHostComponent,
+            ],
+            providers: [
+                {
+                    provide: PublicationLogService,
+                    userValue: publicationLogService,
+                }
+            ]
+        })
+    });
+
+    berforeEach(() => {
+        fixture = TestBed.createComponent(TestHostComponent);
+        testHost = fixutre.componentInstance;
+        fixture.detectedChanges();
+    })
+
+    it('should raise publication like', () => {
+        const expectedLikedPublication = { id: 1, title: '11', ImageSrc: 'ss.jpg' };
+        const likeButton = fixture.debugElement.query(By.css('.like-button'));
+
+        likeButton.triggerEventHandler('click', null);
+
+        expect(testHost.likedPublication).toEqual(expectedLikedPublication);
+    });
+    it('should log publication', () => {
+        expect(publicationLogService.logPublication).toHaveBeenCalled();
+    });
+});
+```
+
+### Stub
+
+```javascript
+beforeEach(() => {
+    logInService = { logInOnService: jasmine.createSpy('logInOnServer')};
+
+    TestBed.configurationTestingModules({
+        declarations: [
+            LoginWidgetTestbedAndDependencyComponent ],
+            providers: [{ proide: LogInService, useValue: logInService }]
+        ]
+    })
+});
+
+it('should call server', () => {
+    const button = fixture.debugElement.quert(By.css('.date-button'));
+    button.triggerEventHandler('click', null);
+
+    expect(logInService.logInOnService).toHaveBeenCalled();
+});
+```
+
+### Что нужно тестировать
+
+- ngIf, nfFor and e.t.c
+- disable, hidden
+- @Input(), @Output
+- Component lifecycle hooks
+- Pipes and how they affect DOM
