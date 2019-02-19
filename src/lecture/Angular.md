@@ -82,9 +82,195 @@ Questions:
 
 ## Directives
 
-## Guard
+### Виды директов
+
+- Components
+- Структурные - помечаются звездочкой - добавляют и удаляют элементы (ngIf and ngFor)
+- Атрибуты - ничего не делают с дом деревом, но они меняют поведение наших элементов
+
+### Стуктурные директивы
+
+<aside class="notice">
+На один элемент может быть одна стуктурная дирректива
+</aside>
+
+- Оптмизирует расходы памяти
+- ngIf
+- ngSwitch
+- ngFor - микросинтасксис: `index`, `fist`, `last`, `even` and `odd`
+
+```html
+<li *ngFor="let user of users; let i = index">
+    <p>name: {{user.name}} - index: {{i}}</p>
+</li>
+<template ngFor let-her [ngForOf]="heroes">
+    <div>{{hero}}</div>
+</template>
+```
+
+- ngStyle
+
+```html
+<span [style.background-color]="'red'"></span>
+<span bind-style.background-color="'red'"></span>
+<span [ngStyle]="{'background-color':'red'}"></span>
+```
+
+- ngClass
+
+```html
+<div [ngClass]="string|Array|obj"></div>
+<div [ngClass]="{class: true, class-two: false }"></div>
+```
+
+- ngNonBindable - игонрирование бандинга
+
+```html
+<span ngNonBindable>some {{content}} text</span> --> some {{content}} text
+```
+
+- Кастоманая директива
+
+```typescript
+@Directive({
+    selector: '[appHightLight]'
+})
+export class HighLigtDirective {
+    constructor(private el: ElementRef, private render: Render2) {
+        this.render.setStyle(this.el.nativeElement, 'background-color', 'yellow');
+    }
+}
+
+@Directive({
+    selector: '[appHightLightHover]'
+})
+export class HighLigtDirective {
+    @Input() hightlightColor: string;
+    // <span appHightLightHover [hightlightColor]="colorFromModel" >
+    @Input('appHightLightHover') hightlightColor: string;
+    // <span [appHightLightHover]="colorFromModel" >
+    constructor(private el: ElementRef, private render: Render2) {
+    }
+
+    @HostListener('mouseenter') onMouseEnter() {
+        this.hightlight('red');
+    }
+     @HostListener('mouseleave') onMouseEnter() {
+        this.hightlight(null);
+    }
+
+    private hightlight(color: string): void {
+        this.render.setStyle(this.el.nativeElement, 'background-color', color);
+    }
+}
+
+@Directive({
+    selector: '[appHide]'
+})
+export class AppHideDirective {
+    @Input() set appHide(condition: boolean) {
+        if(!condition) {
+            this.viewContainer.createEmberddedView(view.templateRef)
+        } else {
+            this.viewContainer.clear();
+        }
+    }
+
+    constructor(private templateRef: TemplateRef<any>,
+        private viewContainer: ViewContainterRef) {
+            // templateRef - 
+            // viewContainer - ссылка куда будет вставлен компонент
+        }
+    // Реализация может быть ещё через `ngOnChanges`
+    // <div *appHide="propFromModel|true|false">Some text</div>
+}
+@NgModules({
+    declarations: {
+        HighLigtDirective,
+        HighLigtDirective,
+        AppHideDirective
+    }
+})
+
+// usage
+<div appHightLight appHightLightHover></div>
+```
 
 ## Pipe
+
+- Зачем нужны - мотификация данных перед отображением пользователю. Примеры: сортировка, фильтрация и т.д.
+
+### Pure vs ImPure
+
+- Pure - строго регламентируется когда будет работать|сработает.
+Бдуте работать когда он получит примитив или изменяется !ссылка! обьекта
+- ImPure - при любом изменении в нашем компоненте он будет срабатывать, аля `NgOnChange`. Можно изменить через `pure: false|true` в декораторе Pipe при обьявлении класса.
+
+### Async Pipe
+
+```html
+<p>{{data | async }}<p>
+<!-- Print `RECEIVIDE DATA` after 5 sec -->
+```
+
+```typescript
+export class AsyncPipeComponent {
+    public data = new Promise(resolve => {
+        setTimeout(() => {
+            resolve('RECEIVIDE DATA!')
+        }, 500);
+    })
+}
+```
+
+### Использование
+
+```html
+<p>{{ now | date: 'dd.MM.yyyy' }}</p> -> format string
+<p>{{expression | pipeName:parameter1:parameter2 }}</p>
+<p>{{'Angular2' | slice:3 | uppercase }}</p>
+```
+
+```typescript
+@Component({
+    providers: [AgePipe, DatePipe],
+})
+class SomseComponent {
+    public currentDay: string = new DatePipe().transform(new Date(), 'yyyy/MM/dd');
+    constructor(private _agePipe: AgePipe) {
+        this.age = this._agePipe.transform(this.allEmployees, 30)
+    }
+}
+```
+
+### Встроенные пайпы глядеть в офф. доке
+
+### Кастомные пайпы
+
+```typescript
+@Pipe({
+    name: 'sortByStatus',
+})
+export class SortPipe implements PipeTransform {
+    tranfsofrm(allTasks: any[], status: string): any {
+        if(!allTasks || !status) {
+            return allTask
+        }
+         return allTask.filter((task) => task.status === status);
+    }
+}
+
+@NgModule({
+    declarations: [
+        SortPipe,
+    ]
+})
+
+// Example
+<li *ngFor="let task of tasks | sortedByStatus: status" >{{task.name}} - {{task.status}}</li>
+```
+
+## Guard
 
 ## Module
 
