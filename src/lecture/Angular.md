@@ -5,7 +5,13 @@
 - [Lifecycle](#Lifecycle)
 - [Data binding](#Data-binding)
 - [Directives](#Directives)
+- [Pipe](#pipe)
 - [Components](#Components)
+- [Templates](#Templates)
+- [Router](#Router)
+- [Modules](#Modules)
+- [Services](#Services)
+- [Dependency Injection](#Dependency-injection)
 - [Store Managment](#Store-Managment)
 - [Unit test](#unit-test)
 
@@ -272,8 +278,6 @@ export class SortPipe implements PipeTransform {
 
 ## Guard
 
-## Module
-
 ## Components
 
 - `Компоненты` - это "строительные"  блоки UI в приложении. Они простым TS классом и это декоратор который представляет собой набор мета информации о классе. Он наследуется от `Directive`.
@@ -289,7 +293,7 @@ export class SortPipe implements PipeTransform {
 - `ng-template` -
 - `ng-`
 
-## Components Metadata
+### Components Metadata
 
 - `animation` - list of animation of this components
 - `changeDetection` -
@@ -313,12 +317,12 @@ export class SortPipe implements PipeTransform {
 - `* queries` -
 - `* selector` -
 
-## Decorators
+### Decorators
 
 - `@Input` - связавыает родителя и дете
 - `@Output` - не поддерживает bubling
 
-## Smart and Dump Components
+### Smart and Dump Components
 
 По-сути пришли с React
 
@@ -344,7 +348,69 @@ export class SortPipe implements PipeTransform {
 
 ## Router
 
+## Modules
+
+- JIT - динамическая компиляция
+- AOT - статическая компиляция - более производительтая, меньше бандл
+
+!! Отдельно почитать
+
+### Example
+
+```typescript
+// Create export module
+@NgModule({
+    import: [
+        CommonModule,
+    ],
+    declarations: [
+        TodoListComponent,
+        TodoItemComponent,
+        TodoItemPipe,
+        TodoItemDirective,
+    ],
+    providers: [
+        TodoService,
+    ],
+    exports: [
+        TodoListComponent
+    ],
+})
+export class TodoModule { }
+
+// Import module to another module
+// !!! Здесь также будет доступен TodoService
+@NgModule ({
+    import: [
+        CommonModule,
+        // Import module here
+        TodoModule,
+    ],
+    declarations: [
+        MainComponent,
+    ],
+    bootstrap: [MainComponent]
+})
+export class MainModule { }
+```
+
+### Встроенные модули
+
+- BrowserModule - для работы в браузере
+- FormsModule - для работы с формами
+- HttpModule - для работы с back-end
+
+### Lazy Loading
+
+### Важно
+
 ## Service
+
+## Dependency Injection
+
+```typescript
+
+```
 
 ## Store Managment
 
